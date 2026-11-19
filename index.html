@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Cofre · Tu oro, bajo llave</title>
+
+  <!-- Para que se pueda instalar como app en el celular -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1C1A17">
+  <link rel="icon" href="iconos/icono.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="iconos/icono-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cofre">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+  <!-- Encabezado -->
+  <header class="encabezado">
+    <div class="contenedor fila-encabezado">
+      <div class="marca">
+        <h1><span aria-hidden="true">🗝️</span> Cofre</h1>
+        <p class="lema">Tu oro, bajo llave</p>
+      </div>
+
+      <!-- Menú escondido: se abre con ☰ -->
+      <div class="menu">
+        <button id="btnMenu" class="boton-menu" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="panelMenu">☰</button>
+        <div id="panelMenu" class="panel-menu" hidden>
+          <p class="titulo-menu">Respaldo de tus datos</p>
+          <button id="btnExportar" class="opcion-menu" type="button">
+            <span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg></span>
+            <span><strong>Descargar respaldo</strong><small>Guarda una copia en un archivo</small></span>
+          </button>
+          <label class="opcion-menu">
+            <span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M5 20h14"/></svg></span>
+            <span><strong>Cargar respaldo</strong><small>Recupera tus datos desde un archivo</small></span>
+            <input type="file" id="archivoImportar" accept=".json,application/json" hidden>
+          </label>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <div id="avisoGuardado" class="aviso" hidden>
+      ⚠️ Este navegador no permite guardar datos. Lo que anotes se perderá al cerrar la página. Usa "Descargar respaldo" (menú ☰) antes de salir.
+    </div>
+
+    <!-- ===================== PESTAÑA: INICIO ===================== -->
+    <div class="pestana" id="pestana-inicio" data-pestana="inicio">
+      <section class="tarjeta-seccion" aria-labelledby="tituloResumen">
+        <div class="cabecera-seccion">
+          <h2 id="tituloResumen">Resumen</h2>
+          <div class="selector-periodo" role="group" aria-label="Periodo">
+            <button data-periodo="1">Hoy</button>
+            <button data-periodo="7">7 días</button>
+            <button data-periodo="mes" class="activo">Este mes</button>
+          </div>
+        </div>
+
+        <div class="totales">
+          <div class="total ingreso">
+            <span>Ingresos</span>
+            <strong id="totalIngresos">L 0.00</strong>
+          </div>
+          <div class="total gasto">
+            <span>Gastos</span>
+            <strong id="totalGastos">L 0.00</strong>
+          </div>
+          <div class="total saldo">
+            <span>Saldo</span>
+            <strong id="totalSaldo">L 0.00</strong>
+          </div>
+        </div>
+
+        <div class="graficas">
+          <div class="caja-grafica">
+            <h3 id="tituloBarras">Ingresos y gastos de este mes</h3>
+            <div class="lienzo"><canvas id="graficaBarras"></canvas></div>
+          </div>
+          <div class="caja-grafica">
+            <h3>Gastos por categoría</h3>
+            <div class="lienzo"><canvas id="graficaDona"></canvas></div>
+            <p id="sinGastos" class="vacio" hidden>No hay gastos en este periodo.</p>
+          </div>
+        </div>
+        <p id="sinGraficas" class="vacio" hidden>Las gráficas necesitan internet la primera vez que abres la app. Tus datos y totales siguen funcionando.</p>
+      </section>
+    </div>
+
+    <!-- ===================== PESTAÑA: MOVIMIENTOS ===================== -->
+    <div class="pestana" id="pestana-movimientos" data-pestana="movimientos" hidden>
+      <section class="tarjeta-seccion" aria-labelledby="tituloLista">
+        <div class="cabecera-seccion">
+          <h2 id="tituloLista">Movimientos</h2>
+          <div class="selector-periodo" role="group" aria-label="Periodo">
+            <button data-periodo="1">Hoy</button>
+            <button data-periodo="7">7 días</button>
+            <button data-periodo="mes" class="activo">Este mes</button>
+          </div>
+        </div>
+        <ul id="listaMovimientos" class="lista"></ul>
+        <p id="sinMovimientos" class="vacio">Todavía no hay movimientos en este periodo. Toca <strong>+</strong> para anotar uno.</p>
+      </section>
+    </div>
+
+    <!-- ===================== PESTAÑA: MES ===================== -->
+    <div class="pestana" id="pestana-mes" data-pestana="mes" hidden>
+      <section class="tarjeta-seccion" aria-labelledby="tituloMes">
+        <div class="cabecera-seccion">
+          <h2 id="tituloMes">Este mes</h2>
+          <span id="nombreMes" class="etiqueta"></span>
+        </div>
+
+        <div class="mes-grid">
+          <div>
+            <h3>Presupuesto por categoría</h3>
+            <p class="nota">Ponle un límite al mes a cada categoría. Te aviso al llegar al 80 % y si te pasas.</p>
+            <form id="formPresupuesto" class="form-linea">
+              <select id="presCategoria" aria-label="Categoría del presupuesto"></select>
+              <input type="number" id="presMonto" min="1" step="0.01" placeholder="Límite L" required inputmode="decimal" aria-label="Límite mensual en Lempiras">
+              <button type="submit" class="boton-mini">Poner límite</button>
+            </form>
+            <div id="listaPresupuestos" class="metas"></div>
+            <p id="sinPresupuestos" class="vacio">Aún no tienes límites. Prueba con Alimentación o Entretenimiento.</p>
+          </div>
+
+          <div>
+            <h3>Comparado con el mes pasado</h3>
+            <p id="notaComparacion" class="nota"></p>
+            <div id="comparacion" class="comparacion"></div>
+            <div class="lienzo"><canvas id="graficaComparacion"></canvas></div>
+            <p id="sinComparacion" class="vacio" hidden>Todavía no hay gastos para comparar.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================== PESTAÑA: METAS ===================== -->
+    <div class="pestana" id="pestana-metas" data-pestana="metas" hidden>
+      <section class="tarjeta-seccion" aria-labelledby="tituloMetas">
+        <h2 id="tituloMetas">Metas de ahorro</h2>
+        <div id="listaMetas" class="metas"></div>
+        <p id="sinMetas" class="vacio">Crea tu primera meta. ¿Para qué quieres ahorrar?</p>
+
+        <h3 class="subtitulo">Nueva meta</h3>
+        <form id="formMeta" class="formulario">
+          <label>Nombre de la meta
+            <input type="text" id="metaNombre" maxlength="50" placeholder="Ej: Consola nueva" required>
+          </label>
+          <label>Monto objetivo (L)
+            <input type="number" id="metaObjetivo" min="1" step="0.01" placeholder="12000" required inputmode="decimal">
+          </label>
+          <label>Fecha límite (opcional)
+            <input type="date" id="metaFecha">
+          </label>
+          <button type="submit" class="boton">Crear meta</button>
+        </form>
+      </section>
+    </div>
+
+    <footer class="pie">Cofre · Hecho por Victor Pinto con ayuda de Claude Code · Tus datos se guardan solo en este dispositivo</footer>
+  </main>
+
+  <!-- Botón flotante para anotar -->
+  <button id="btnAnotar" class="fab" type="button" aria-label="Anotar movimiento">+</button>
+
+  <!-- Hoja que sube desde abajo con el formulario -->
+  <dialog id="hojaAnotar" class="hoja" aria-labelledby="tituloMov">
+    <form id="formMovimiento" class="formulario">
+      <div class="cabecera-hoja">
+        <h2 id="tituloMov">Anotar movimiento</h2>
+        <button type="button" id="btnCerrarHoja" class="boton-cerrar" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="tipo-mov" role="radiogroup" aria-label="Tipo">
+        <label><input type="radio" name="tipo" value="gasto" checked> <span>Gasto</span></label>
+        <label><input type="radio" name="tipo" value="ingreso"> <span>Ingreso</span></label>
+      </div>
+      <label>Monto (L)
+        <input type="number" id="monto" min="0.01" step="0.01" placeholder="0.00" required inputmode="decimal">
+      </label>
+      <label>Categoría
+        <select id="categoria" required></select>
+      </label>
+      <div class="dos-campos">
+        <label>Fecha
+          <input type="date" id="fecha" required>
+        </label>
+        <label>Descripción
+          <input type="text" id="descripcion" maxlength="80" placeholder="Ej: almuerzo">
+        </label>
+      </div>
+      <div class="botones-form">
+        <button type="submit" id="btnGuardarMov" class="boton">Guardar movimiento</button>
+        <button type="button" id="btnCancelarEdicion" class="boton-sec" hidden>Cancelar edición</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Barra de pestañas abajo -->
+  <nav class="barra-pestanas" aria-label="Secciones">
+    <button data-ir="inicio" class="activa"><span aria-hidden="true">🏠</span>Inicio</button>
+    <button data-ir="movimientos"><span aria-hidden="true">📜</span>Movimientos</button>
+    <button data-ir="mes"><span aria-hidden="true">📅</span>Mes</button>
+    <button data-ir="metas"><span aria-hidden="true">🎯</span>Metas</button>
+  </nav>
+
+  <!-- Aviso flotante (por ejemplo: "Movimiento borrado · Deshacer") -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden>
+    <span id="toastTexto"></span>
+    <button id="toastDeshacer" type="button">Deshacer</button>
+  </div>
+
+  <!-- Librería de gráficas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Lógica de la app -->
+  <script src="app.js"></script>
+</body>
+</html>
